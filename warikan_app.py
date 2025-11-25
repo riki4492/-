@@ -1,5 +1,5 @@
 import math
-import pandas as pd
+import pandas as pd  # ※今は使ってないけど、今後拡張しやすいように残しておく
 import streamlit as st
 
 # ---------------------------------------
@@ -46,7 +46,7 @@ st.write("---")
 # ---------------------------------------
 st.subheader("🧍 固定で払う人")
 
-num_fixed = st.number_input("固定で払う人の人数", min_value=0, step=1, value=1)
+num_fixed = st.number_input("固定で払う人の人数", min_value=0, step=1, value=0)
 int_num_fixed = int(num_fixed)
 
 fixed_names = []
@@ -113,7 +113,7 @@ if st.button("計算する"):
         fixed_total = sum(fixed_amounts)
         remain = total - fixed_total
 
-        # 固定の人のテーブル
+        # 固定の人のデータ
         fixed_rows = []
         for name, amount in zip(fixed_names, fixed_amounts):
             fixed_rows.append(
@@ -129,8 +129,8 @@ if st.button("計算する"):
         # 位割り対象の人数・重み
         total_people_rank = sum(rank_counts.values())
 
-        # remain < 0 は明らかにおかしいのでエラー
         if remain < 0:
+            # remain < 0 は明らかにおかしいのでエラー
             st.error(
                 f"固定額の合計 {fixed_total:,} 円 が合計金額 {total:,} 円 を超えています。\n"
                 "固定額を見直してください。"
@@ -215,14 +215,31 @@ if st.button("計算する"):
 
             st.subheader("📊 結果一覧")
 
-            all_rows = fixed_rows + rank_rows
-            if all_rows:
-                df = pd.DataFrame(all_rows)
-                st.dataframe(df, hide_index=True)
-            else:
+            # ====== 固定で払う人（縦カード表示）======
+            if fixed_rows:
+                st.markdown("### 固定で払う人")
+                for r in fixed_rows:
+                    with st.container():
+                        st.markdown(f"**{r['名前 / 位']}**（固定）")
+                        st.markdown(f"- 人数：{r['人数']}人")
+                        st.markdown(f"- 1人あたり：{r['1人あたり（円）']:,}円")
+                        st.markdown(f"- 合計：{r['合計（円）']:,}円")
+                        st.markdown("---")
+
+            # ====== 位で割る人（縦カード表示）======
+            if rank_rows:
+                st.markdown("### 位で割る人")
+                for r in rank_rows:
+                    with st.container():
+                        st.markdown(f"**{r['名前 / 位']}**")
+                        st.markdown(f"- 人数：{r['人数']}人")
+                        st.markdown(f"- 1人あたり：{r['1人あたり（円）']:,}円")
+                        st.markdown(f"- 合計：{r['合計（円）']:,}円")
+                        st.markdown("---")
+
+            if not fixed_rows and not rank_rows:
                 st.info("まだ固定額も位割りも設定されていません。")
 
-            st.write("---")
             st.write(f"**合計金額**：{total:,} 円")
             st.write(f"・固定で払う人の合計：{fixed_total:,} 円")
             st.write(f"・位で割る人の合計：{rank_total:,} 円")
