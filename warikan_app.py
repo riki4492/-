@@ -49,7 +49,7 @@ round_option = st.sidebar.selectbox(
 # ---------------------------------------
 # 共通：合計金額
 # ---------------------------------------
-# ★ ここだけがモード名表示。太帯(subheader)はもう使わない
+# モード名（細いグレー文字）
 st.caption(pattern_labels[pattern_key])
 
 total = st.number_input("合計金額（円）", min_value=0, step=100, value=0)
@@ -62,47 +62,52 @@ names_p2, ranks_p2 = [], []
 rank_counts_p3 = {rank: 0 for rank in rank_list}
 
 # ---------------------------------------
-# パターン①：数人固定額 + 残り位割り
+# パターン①：数人固定額 + 残り位割り（縦カード表示）
 # ---------------------------------------
 if pattern_key == "p1":
     num_people_p1 = st.number_input("人数", min_value=1, step=1, value=4, key="p1_num")
     int_num_p1 = int(num_people_p1)
 
-    st.caption("※ 固定額 or 位割りを人ごとに選ぶ")
+    st.caption("※ 1人ずつ「固定額」か「位割り」を選ぶ")
 
     for i in range(int_num_p1):
         default_name = f"人{i+1}"
+
         with st.container():
-            cols = st.columns([2, 1.3, 2])
-            with cols[0]:
-                name = st.text_input(
-                    f"名前（{i+1}人目）",
-                    value=default_name,
-                    key=f"p1_name_{i}",
-                )
-                if name.strip() == "":
-                    name = default_name
-            with cols[1]:
-                fixed_flag = st.checkbox("固定額", value=False, key=f"p1_fixed_flag_{i}")
+            st.markdown(f"#### {i+1}人目")
+            # 名前（縦）
+            name = st.text_input(
+                "名前",
+                value=default_name,
+                key=f"p1_name_{i}",
+            )
+            if name.strip() == "":
+                name = default_name
+
+            # 固定額にするかどうか
+            fixed_flag = st.checkbox("固定額にする", value=False, key=f"p1_fixed_flag_{i}")
+
+            # 固定額 or 位（ランク）を縦に
             if fixed_flag:
-                with cols[2]:
-                    fixed_value = st.number_input(
-                        "固定額（円）",
-                        min_value=0,
-                        step=100,
-                        value=0,
-                        key=f"p1_fixed_{i}",
-                    )
+                fixed_value = st.number_input(
+                    "固定額（円）",
+                    min_value=0,
+                    step=100,
+                    value=0,
+                    key=f"p1_fixed_{i}",
+                )
                 rank = None
             else:
                 fixed_value = 0
-                with cols[2]:
-                    rank = st.selectbox(
-                        "位（ランク）",
-                        rank_list,
-                        index=2,
-                        key=f"p1_rank_{i}",
-                    )
+                rank = st.selectbox(
+                    "位（ランク）",
+                    rank_list,
+                    index=2,
+                    key=f"p1_rank_{i}",
+                )
+
+        # 人ごとの区切り線（スマホで見やすく）
+        st.markdown("---")
 
         names_p1.append(name)
         is_fixed_p1.append(fixed_flag)
@@ -110,7 +115,7 @@ if pattern_key == "p1":
         ranks_p1.append(rank)
 
 # ---------------------------------------
-# パターン②：全員位割り（人ごと）
+# パターン②：全員位割り（人ごと・縦カード表示）
 # ---------------------------------------
 elif pattern_key == "p2":
     num_people_p2 = st.number_input("人数", min_value=1, step=1, value=4, key="p2_num")
@@ -120,27 +125,31 @@ elif pattern_key == "p2":
 
     for i in range(int_num_p2):
         default_name = f"人{i+1}"
-        cols = st.columns([2, 2])
-        with cols[0]:
+        with st.container():
+            st.markdown(f"#### {i+1}人目")
+
             name = st.text_input(
-                f"名前（{i+1}人目）",
+                "名前",
                 value=default_name,
                 key=f"p2_name_{i}",
             )
             if name.strip() == "":
                 name = default_name
-        with cols[1]:
+
             rank = st.selectbox(
-                f"位（{default_name}）",
+                "位（ランク）",
                 rank_list,
                 index=2,
                 key=f"p2_rank_{i}",
             )
+
+        st.markdown("---")
+
         names_p2.append(name)
         ranks_p2.append(rank)
 
 # ---------------------------------------
-# パターン③：位ごとの人数
+# パターン③：位ごとの人数（これは元から縦なのでほぼそのまま）
 # ---------------------------------------
 else:  # p3
     st.caption("※ 名前は不要。どの位の人が何人いるかだけ入力")
